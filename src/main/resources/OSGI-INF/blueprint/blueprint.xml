@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0"
+           xsi:schemaLocation="
+             http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd
+             http://www.osgi.org/xmlns/blueprint/v1.0.0 https://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+
+    <bean id="node" class="br.uefs.larsid.dlt.iot.soft.models.Node"
+        init-method="start" destroy-method="stop">
+        <property name="checkDeviceTaskTime" value="${checkDeviceTaskTime}" />
+        <property name="deviceAPIAddress" value="${deviceAPIAddress}" />
+        <property name="debugModeValue" value="${debugModeValue}" />
+    </bean>
+    
+    <bean id="MQTTClientUp" class="br.uefs.larsid.dlt.iot.soft.mqtt.MQTTClient"
+        init-method="start" destroy-method="stop">
+        <property name="debugModeValue" value="${debugModeValue}" />
+        <property name="ip" value="${ip_up}" />
+        <property name="port" value="${port_up}" />
+        <property name="userName" value="${user}" />
+        <property name="password" value="${pass}" />
+    </bean>
+    
+    <bean id="MQTTClientHost" class="br.uefs.larsid.dlt.iot.soft.mqtt.MQTTClient"
+        init-method="start" destroy-method="stop">
+        <property name="debugModeValue" value="${debugModeValue}" />
+        <property name="ip" value="${ip}" />
+        <property name="port" value="${port}" />
+        <property name="userName" value="${user}" />
+        <property name="password" value="${pass}" />
+    </bean>
+
+    <bean id="controllerImpl" class="br.uefs.larsid.dlt.iot.soft.models.ControllerImpl"
+        init-method="start" destroy-method="stop">
+        <property name="node" ref="node" />
+        <property name="MQTTClientUp" ref="MQTTClientUp" />
+        <property name="MQTTClientHost" ref="MQTTClientHost" />
+        <property name="hasNodes" value="${hasNodes}" />
+        <property name="timeoutInSeconds" value="${timeoutInSeconds}" />
+        <property name="debugModeValue" value="${debugModeValue}" />
+    </bean>
+
+  <cm:property-placeholder
+		persistent-id="br.uefs.larsid.dlt.soft_iot.cloud_broker"
+		update-strategy="reload">
+		<cm:default-properties>
+			<cm:property name="ip_up" value="localhost" />
+            <cm:property name="port_up" value="1883" />
+			<cm:property name="ip" value="localhost" />
+			<cm:property name="port" value="1883" />
+			<cm:property name="user" value="karaf" />
+			<cm:property name="pass" value="karaf" />
+			<cm:property name="deviceAPIAddress" value="http://localhost:8181/cxf/iot-service/devices" />
+			<cm:property name="hasNodes" value="true" />
+			<cm:property name="timeoutInSeconds" value="30" />
+            <cm:property name="checkDeviceTaskTime" value="5" />
+			<cm:property name="debugModeValue" value="true" />
+		</cm:default-properties>
+	</cm:property-placeholder>
+
+</blueprint>
