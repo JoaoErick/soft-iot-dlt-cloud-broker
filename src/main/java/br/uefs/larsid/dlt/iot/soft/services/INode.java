@@ -16,15 +16,23 @@ public interface INode {
 
     public void setDevices(List<Device> devices);
 
-    public List<String> getAuthenticatedDevicesIds();
+    // public List<String> getAuthenticatedDevicesIds();
 
-    public void setAuthenticatedDevicesIds(List<String> authenticatedDevicesIds);
+    // public void setAuthenticatedDevicesIds(List<String> authenticatedDevicesIds);
 
-    public int getCheckDeviceTaskTime();
+    public int getSendTopKRequestTaskTime();
 
-    public void setCheckDeviceTaskTime(int checkDeviceTaskTime);
+    public void setSendTopKRequestTaskTime(int sendTopKRequestTaskTime);
 
     public String getDeviceAPIAddress();
 
     public void setDeviceAPIAddress(String deviceAPIAddress);
+
+    public Controller getController();
+
+    public void setController(Controller controller);
+
+    public boolean isDebugModeValue();
+
+    public void setDebugModeValue(boolean debugModeValue);
 }

@@ -15,20 +15,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import br.uefs.larsid.dlt.iot.soft.services.Controller;
 import br.uefs.larsid.dlt.iot.soft.entities.Device;
 import br.uefs.larsid.dlt.iot.soft.entities.Sensor;
 import br.uefs.larsid.dlt.iot.soft.services.INode;
-import br.uefs.larsid.dlt.iot.soft.tasks.CheckDevicesTask;
+import br.uefs.larsid.dlt.iot.soft.tasks.SendTopKRequestTask;
 
 public class Node implements INode {
     private List<Device> devices;
-    private List<String> authenticatedDevicesIds;
+    // private List<String> authenticatedDevicesIds;
 
-    private int checkDeviceTaskTime;
-    private Timer checkDeviceTimer;
+    private int sendTopKRequestTaskTime;
+    private Timer sendTopKRequestTimer;
 
     private String deviceAPIAddress;
 
+    private Controller controller;
     private boolean debugModeValue;
     private static final Logger logger = Logger.getLogger(Node.class.getName());
 
@@ -37,20 +39,20 @@ public class Node implements INode {
 
     public void start() {
         this.devices = new ArrayList<>();
-        this.authenticatedDevicesIds = new ArrayList<>();
-        this.checkDeviceTimer = new Timer();
-        this.checkDeviceTimer.scheduleAtFixedRate(
-                new CheckDevicesTask(this),
-                0,
-                this.checkDeviceTaskTime * 1000);
+        // this.authenticatedDevicesIds = new ArrayList<>();
+        this.sendTopKRequestTimer = new Timer();
+        // this.sendTopKRequestTimer.scheduleAtFixedRate(
+        //         new SendTopKRequestTask(this),
+        //         0,
+        //         this.sendTopKRequestTaskTime * 1000);
     }
 
     /**
      * Executa o que foi definido na função quando o bundle for finalizado.
      */
     public void stop() {
-        if (this.checkDeviceTimer != null) {
-            this.checkDeviceTimer.cancel();
+        if (this.sendTopKRequestTimer != null) {
+            this.sendTopKRequestTimer.cancel();
         }
     }
 
@@ -114,20 +116,20 @@ public class Node implements INode {
         this.devices = devices;
     }
 
-    public List<String> getAuthenticatedDevicesIds() {
-        return authenticatedDevicesIds;
+    // public List<String> getAuthenticatedDevicesIds() {
+    //     return authenticatedDevicesIds;
+    // }
+
+    // public void setAuthenticatedDevicesIds(List<String> authenticatedDevicesIds) {
+    //     this.authenticatedDevicesIds = authenticatedDevicesIds;
+    // }
+
+    public int getSendTopKRequestTaskTime() {
+        return sendTopKRequestTaskTime;
     }
 
-    public void setAuthenticatedDevicesIds(List<String> authenticatedDevicesIds) {
-        this.authenticatedDevicesIds = authenticatedDevicesIds;
-    }
-
-    public int getCheckDeviceTaskTime() {
-        return checkDeviceTaskTime;
-    }
-
-    public void setCheckDeviceTaskTime(int checkDeviceTaskTime) {
-        this.checkDeviceTaskTime = checkDeviceTaskTime;
+    public void setSendTopKRequestTaskTime(int sendTopKRequestTaskTime) {
+        this.sendTopKRequestTaskTime = sendTopKRequestTaskTime;
     }
 
     public String getDeviceAPIAddress() {
@@ -136,6 +138,19 @@ public class Node implements INode {
 
     public void setDeviceAPIAddress(String deviceAPIAddress) {
         this.deviceAPIAddress = deviceAPIAddress;
+    }
+
+    public Controller getController() {
+        return controller;
+    }
+
+    public void setController(Controller controller) {
+        this.controller = controller;
+
+        this.sendTopKRequestTimer.scheduleAtFixedRate(
+                new SendTopKRequestTask(this, controller, debugModeValue),
+                0,
+                this.sendTopKRequestTaskTime * 1000);
     }
 
     public boolean isDebugModeValue() {
