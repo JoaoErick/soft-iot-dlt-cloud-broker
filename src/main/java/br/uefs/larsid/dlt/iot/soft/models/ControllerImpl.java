@@ -2,7 +2,7 @@ package br.uefs.larsid.dlt.iot.soft.models;
 
 // import br.uefs.larsid.dlt.iot.soft.entities.Device;
 import br.uefs.larsid.dlt.iot.soft.entities.Sensor;
-import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerAuthenticatedDevices;
+// import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerAuthenticatedDevices;
 import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerConnection;
 // import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerDeviceScoreEdge;
 // import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerDeviceScoreFog;
@@ -49,7 +49,7 @@ public class ControllerImpl implements Controller {
 
   private Node node;
 
-  private boolean hasNodes;
+  // private boolean hasNodes;
   private MQTTClient MQTTClientUp;
   private MQTTClient MQTTClientHost;
 
@@ -77,9 +77,10 @@ public class ControllerImpl implements Controller {
   public void start() {
     this.MQTTClientUp.connect();
     this.MQTTClientHost.connect();
+    this.node.setController(this);
 
     devicesScores = new LinkedHashMap<String, Integer>();
-    if (hasNodes) {
+    // if (hasNodes) {
       nodesUris = new ArrayList<>();
       // String[] topicsRequest = { TOP_K };
       String[] topicsConnection = { CONNECT, DISCONNECT };
@@ -104,7 +105,7 @@ public class ControllerImpl implements Controller {
       //     topicsDeviceScore,
       //     QOS,
       //     debugModeValue);
-    } // else {
+    // } else {
     //   String[] topics = { TOP_K, SENSORS };
     //   String[] topicsDeviceScore = { DEVICE_SCORE };
 
@@ -130,34 +131,32 @@ public class ControllerImpl implements Controller {
       // this.MQTTClientUp.publish(CONNECT, payload, QOS);
     // }
 
-    String[] topicsAutheticatedDevices = { AUTHENTICATED_DEVICES };
+    // String[] topicsAutheticatedDevices = { AUTHENTICATED_DEVICES };
 
-    new ListenerAuthenticatedDevices(
-          this,
-          MQTTClientHost,
-          topicsAutheticatedDevices,
-          QOS,
-          debugModeValue);
-
-    this.sendTopK();
+    // new ListenerAuthenticatedDevices(
+    //       this,
+    //       MQTTClientHost,
+    //       topicsAutheticatedDevices,
+    //       QOS,
+    //       debugModeValue);
   }
 
   /**
    * Finaliza o bundle.
    */
   public void stop() {
-    if (!this.hasNodes) {
-      byte[] payload = String
-          .format("%s:%s", MQTTClientHost.getIp(), MQTTClientHost.getPort())
-          .getBytes();
+    // if (!this.hasNodes) {
+    //   byte[] payload = String
+    //       .format("%s:%s", MQTTClientHost.getIp(), MQTTClientHost.getPort())
+    //       .getBytes();
 
-      this.MQTTClientUp.publish(DISCONNECT, payload, QOS);
+    //   this.MQTTClientUp.publish(DISCONNECT, payload, QOS);
 
       // this.MQTTClientUp.unsubscribe(TOP_K);
       // this.MQTTClientUp.unsubscribe(SENSORS);
       // this.MQTTClientHost.unsubscribe(DEVICE_SCORE);
       // this.MQTTClientHost.unsubscribe(AUTHENTICATED_DEVICES);
-    } else {
+    // } else {
       this.MQTTClientUp.unsubscribe(TOP_K);
       // this.MQTTClientUp.unsubscribe(SENSORS_FOG);
       this.MQTTClientUp.unsubscribe(CONNECT);
@@ -167,7 +166,7 @@ public class ControllerImpl implements Controller {
       // this.MQTTClientHost.unsubscribe(SENSORS_RES);
       // this.MQTTClientHost.unsubscribe(DEVICE_SCORE);
       this.MQTTClientHost.unsubscribe(AUTHENTICATED_DEVICES);
-    }
+    // }
 
     this.MQTTClientHost.disconnect();
     this.MQTTClientUp.disconnect();
@@ -210,13 +209,6 @@ public class ControllerImpl implements Controller {
     this.addResponse(id);
 
     this.publishTopK(id, k, functionHealth);
-
-    // Executa esse método novamente depois de 10 segundos
-    try {
-      Thread.sleep(10000);
-    } catch (InterruptedException e) {
-      printlnDebug(e.getMessage());;
-    }
   }
 
   private static JsonObject createSensorJsonObject(String sensor, int weight) {
@@ -360,7 +352,7 @@ public class ControllerImpl implements Controller {
     long start = System.currentTimeMillis();
     long end = start + this.timeoutInSeconds * 1000;
 
-    if (this.hasNodes) {
+    // if (this.hasNodes) {
       /*
        * Enquanto a quantidade de respostas da requisição for menor que o número
        * de nós filhos
@@ -368,7 +360,7 @@ public class ControllerImpl implements Controller {
       while (this.responseQueue.get(id) < this.nodesUris.size() &&
           System.currentTimeMillis() < end) {
       }
-    }
+    // }
 
     this.calculateGeneralTopK(id, k);
   }
@@ -648,45 +640,54 @@ public class ControllerImpl implements Controller {
   public void calculateGeneralTopK(String id, int k) {
     printlnDebug("OK... now let's calculate the TOP-K of TOP-K's!");
 
-    /*
-     * Reordenando o mapa de Top-K (Ex: {device2=23, device1=14}) e
-     * atribuindo-o à carga de mensagem do MQTT
-     */
-    Map<String, Integer> topK = SortTopK.sortTopK(
-        this.getMapById(id),
-        k,
-        debugModeValue);
-
-    // this.waitReceiveScores();
-
-    Map<String, Integer> topKReal = new LinkedHashMap<String, Integer>();
-
-    for (String deviceId : topK.keySet()) {
-      if (this.devicesScores.containsKey(deviceId)) {
-        topKReal.put(deviceId, this.devicesScores.get(deviceId));
+    if (this.topKScores.get(id) != null) {
+      /*
+       * Reordenando o mapa de Top-K (Ex: {device2=23, device1=14}) e
+       * atribuindo-o à carga de mensagem do MQTT
+       */
+      Map<String, Integer> topK = SortTopK.sortTopK(
+          this.getMapById(id),
+          k,
+          debugModeValue);
+  
+      // this.waitReceiveScores();
+  
+      Map<String, Integer> topKReal = new LinkedHashMap<String, Integer>();
+  
+      for (String deviceId : topK.keySet()) {
+        if (this.devicesScores.containsKey(deviceId)) {
+          topKReal.put(deviceId, this.devicesScores.get(deviceId));
+        }
       }
+  
+      this.devicesScores.clear();
+  
+      printlnDebug("==== Cloud gateway -> Client  ====");
+  
+      JsonObject json = new JsonObject();
+      json.addProperty("id", id);
+      json.addProperty("timestamp", System.currentTimeMillis());
+  
+      String deviceListJson = new Gson().toJson(MapToArray.mapToArray(topK, topKReal));
+  
+      json.addProperty("devices", deviceListJson);
+  
+      byte[] payload = json.toString().replace("\\", "").getBytes();
+  
+      MQTTClientUp.publish(TOP_K_RES_FOG + id, payload, 1);
+  
+      printlnDebug(json.toString()); // TODO: apagar
+  
+      this.removeRequest(id);
+      this.removeSpecificResponse(id);
+      
+    } else {
+      printlnDebug("==== Cloud gateway -> Client  ====");
+
+      byte[] payload = "There are no devices connected".getBytes();
+  
+      MQTTClientUp.publish(TOP_K_RES_FOG + id, payload, 1);
     }
-
-    this.devicesScores.clear();
-
-    printlnDebug("==== Cloud gateway -> Client  ====");
-
-    JsonObject json = new JsonObject();
-    json.addProperty("id", id);
-    json.addProperty("timestamp", System.currentTimeMillis());
-
-    String deviceListJson = new Gson().toJson(MapToArray.mapToArray(topK, topKReal));
-
-    json.addProperty("devices", deviceListJson);
-
-    byte[] payload = json.toString().replace("\\", "").getBytes();
-
-    MQTTClientUp.publish(TOP_K_RES_FOG + id, payload, 1);
-
-    printlnDebug(json.toString()); // TODO: apagar
-
-    this.removeRequest(id);
-    this.removeSpecificResponse(id);
 
     this.showResponseTime();
 
@@ -863,14 +864,14 @@ public class ControllerImpl implements Controller {
    *
    * @return boolean
    */
-  @Override
-  public boolean hasNodes() {
-    return hasNodes;
-  }
+  // @Override
+  // public boolean hasNodes() {
+  //   return hasNodes;
+  // }
 
-  public void setHasNodes(boolean hasNodes) {
-    this.hasNodes = hasNodes;
-  }
+  // public void setHasNodes(boolean hasNodes) {
+  //   this.hasNodes = hasNodes;
+  // }
 
   public void setTimeoutInSeconds(int timeoutInSeconds) {
     this.timeoutInSeconds = timeoutInSeconds;

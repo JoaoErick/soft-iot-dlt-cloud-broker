@@ -150,7 +150,7 @@ public interface Controller {
    *
    * @return boolean
    */
-  public boolean hasNodes();
+  // public boolean hasNodes();
 
   /**
    * Retorna a lista de URIs dos nós conectados.
@@ -205,4 +205,6 @@ public interface Controller {
   public long getResponseTime();
 
   public void setResponseTime(long responseTime);
+
+  public void sendTopK();
 }
