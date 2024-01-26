@@ -31,15 +31,15 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
   private boolean debugModeValue;
   private static final Logger logger = Logger.getLogger(MQTTClient.class.getName());
 
-  public MQTTClient() {}
+  public MQTTClient() {
+  }
 
   public MQTTClient(
-    boolean debugModeValue,
-    String ip,
-    String port,
-    String userName,
-    String password
-  ) {
+      boolean debugModeValue,
+      String ip,
+      String port,
+      String userName,
+      String password) {
     this.debugModeValue = debugModeValue;
     this.ip = ip;
     this.port = port;
@@ -53,8 +53,8 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
    * Inicializa o client MQTT.
    */
   public void start() {
-    printlnDebug("(Fog Broker) Starting MQTTClient...");
-    
+    printlnDebug("(Cloud Broker) Starting MQTTClient...");
+
     this.serverURI = String.format("tcp://%s:%s", this.ip, this.port);
 
     this.mqttOptions = new MqttConnectOptions();
@@ -72,7 +72,7 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
    * Finaliza o client MQTT.
    */
   public void stop() {
-    printlnDebug("(Fog Broker) Finishing MQTTClient....");
+    printlnDebug("(Cloud Broker) Finishing MQTTClient....");
   }
 
   /**
@@ -82,22 +82,18 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
   public void connect() {
     try {
       printlnDebug(
-        "(Fog Broker) Trying to connect to the MQTT broker " + this.serverURI + "..."
-      );
+          "(Cloud Broker) Trying to connect to the MQTT broker " + this.serverURI + "...");
 
-      this.mqttClient =
-        new MqttClient(
+      this.mqttClient = new MqttClient(
           this.serverURI,
           String.format("cliente_java_%d", System.currentTimeMillis()),
-          new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir"))
-        );
+          new MqttDefaultFilePersistence(System.getProperty("java.io.tmpdir")));
 
       this.mqttClient.setCallback(this);
       this.mqttClient.connect(mqttOptions);
     } catch (MqttException ex) {
       printlnDebug(
-        "(Fog Broker) Error connecting to MQTT broker " + this.serverURI + " - " + ex
-      );
+          "(Cloud Broker) Error connecting to MQTT broker " + this.serverURI + " - " + ex);
     }
   }
 
@@ -114,9 +110,9 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
       mqttClient.disconnect();
       mqttClient.close();
 
-      printlnDebug("(Fog Broker) Disconnected from MQTT broker!");
+      printlnDebug("(Cloud Broker) Disconnected from MQTT broker!");
     } catch (MqttException ex) {
-      printlnDebug("(Fog Broker) Error disconnecting from MQTT broker - " + ex);
+      printlnDebug("(Cloud Broker) Error disconnecting from MQTT broker - " + ex);
     }
   }
 
@@ -134,10 +130,9 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
    */
   @Override
   public IMqttToken subscribe(
-    int qos,
-    IMqttMessageListener listener,
-    String... topics
-  ) {
+      int qos,
+      IMqttMessageListener listener,
+      String... topics) {
     if (mqttClient == null || topics.length == 0) {
       return null;
     }
@@ -152,18 +147,15 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
 
     try {
       return mqttClient.subscribeWithResponse(
-        topics,
-        qualityOfServices,
-        listeners
-      );
+          topics,
+          qualityOfServices,
+          listeners);
     } catch (MqttException ex) {
       printlnDebug(
-        String.format(
-          "(Fog Broker) Error subscribing to topics %s - %s",
-          Arrays.asList(topics),
-          ex
-        )
-      );
+          String.format(
+              "(Cloud Broker) Error subscribing to topics %s - %s",
+              Arrays.asList(topics),
+              ex));
       return null;
     }
   }
@@ -183,12 +175,10 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
       mqttClient.unsubscribe(topics);
     } catch (MqttException ex) {
       printlnDebug(
-        String.format(
-          "(Fog Broker) Error unsubscribing from topic %s - %s",
-          Arrays.asList(topics),
-          ex
-        )
-      );
+          String.format(
+              "(Cloud Broker) Error unsubscribing from topic %s - %s",
+              Arrays.asList(topics),
+              ex));
     }
   }
 
@@ -196,9 +186,9 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
    * Repassa informações para a publicação de uma mensagem em um tópico
    * no servidor.
    *
-   * @param topic String - Tópico em que será publicada a mensagem.
+   * @param topic   String - Tópico em que será publicada a mensagem.
    * @param payload byte[] - Matriz de bytes da mensagem.
-   * @param qos int - Qualidade do serviço.
+   * @param qos     int - Qualidade do serviço.
    */
   @Override
   public void publish(String topic, byte[] payload, int qos) {
@@ -209,45 +199,44 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
    * Publica uma mensagem em um tópico no servidor e retorna a mensagem
    * aos assinantes assim que for entregue.
    *
-   * @param topic String - Tópico em que será publicada a mensagem.
-   * @param payload byte[] - Matriz de bytes da mensagem.
-   * @param qos int - Qualidade do serviço.
+   * @param topic    String - Tópico em que será publicada a mensagem.
+   * @param payload  byte[] - Matriz de bytes da mensagem.
+   * @param qos      int - Qualidade do serviço.
    * @param retained boolean - Determina se a mensagem deve ou não
-   * ser retida no servidor.
+   *                 ser retida no servidor.
    */
   private synchronized void publish(
-    String topic,
-    byte[] payload,
-    int qos,
-    boolean retained
-  ) {
+      String topic,
+      byte[] payload,
+      int qos,
+      boolean retained) {
     try {
       if (mqttClient.isConnected()) {
         mqttClient.publish(topic, payload, qos, retained);
         printlnDebug(
-          String.format("(Fog Broker) Topic %s published. %dB", topic, payload.length)
-        );
+            String.format("(Cloud Broker) Topic %s published. %dB", topic, payload.length));
       } else {
         printlnDebug(
-          "(Fog Broker) Client disconnected, could not publish topic " + topic
-        );
+            "(Cloud Broker) Client disconnected, could not publish topic " + topic);
       }
     } catch (MqttException ex) {
-      printlnDebug("(Fog Broker) Error to publish " + topic + " - " + ex);
+      printlnDebug("(Cloud Broker) Error to publish " + topic + " - " + ex);
     }
   }
 
   @Override
   public void connectionLost(Throwable cause) {
-    this.printlnDebug(String.format("(Fog Broker) Lost connection to broker (%s). %s", this.ip, cause));
+    this.printlnDebug(String.format("(Cloud Broker) Lost connection to broker (%s). %s", this.ip, cause));
   }
 
   @Override
   public void messageArrived(String topic, MqttMessage message)
-    throws Exception {}
+      throws Exception {
+  }
 
   @Override
-  public void deliveryComplete(IMqttDeliveryToken token) {}
+  public void deliveryComplete(IMqttDeliveryToken token) {
+  }
 
   @Override
   public void connectComplete(boolean reconnect, String serverURI) {
@@ -256,10 +245,8 @@ public class MQTTClient implements MqttCallbackExtended, MQTTClientService {
 
     this.printlnDebug(
         String.format(
-          "(Fog Broker) %s to the MQTT broker!",
-          reconnect ? "Reconnected!" : "Connected"
-        )
-      );
+            "(Cloud Broker) %s to the MQTT broker!",
+            reconnect ? "Reconnected!" : "Connected"));
   }
 
   private void printlnDebug(String str) {

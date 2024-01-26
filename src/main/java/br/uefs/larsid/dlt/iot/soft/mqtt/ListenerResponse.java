@@ -57,7 +57,7 @@ public class ListenerResponse implements IMqttMessageListener {
     final String[] params = topic.split("/");
     String messageContent = new String(message.getPayload());
 
-    printlnDebug("==== Bottom gateway -> Fog gateway  ====");
+    printlnDebug("==== Fog gateway -> Cloud gateway  ====");
 
     /* Verificar qual o tópico recebido. */
     switch (params[0]) {
@@ -93,8 +93,8 @@ public class ListenerResponse implements IMqttMessageListener {
           this.controllerImpl.updateResponse(params[1]);
         } else {
           // TODO: Testar com um dos filhos com mapa vazio.
-          this.controllerImpl.sendEmptyTopK(params[1]);
-          this.controllerImpl.removeRequest(params[1]);
+          // this.controllerImpl.sendEmptyTopK(params[1]);
+          // this.controllerImpl.removeRequest(params[1]);
         }
 
         break;
