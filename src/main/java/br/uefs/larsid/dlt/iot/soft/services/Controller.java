@@ -10,30 +10,6 @@ import java.util.Map;
 
 public interface Controller {
   /**
-   * Calcula o score dos dispositivos conectados e autenticados.
-   *
-   * @return Map
-   */
-  // Map<String, Integer> calculateScoresAuthenticatedDevices(JsonArray functionHealth);
-
-  /**
-   * Calcula o score dos dispositivos conectados.
-   *
-   * @return Map
-   */
-  // Map<String, Integer> calculateScores(JsonArray functionHealth);
-
-  /**
-   * Calcula o Top-k dos dispositivos na névoa.
-   */
-  // void calculateTopKUp();
-
-  // /**
-  //  * Calcula o Top-k dos dispositivos na borda da rede.
-  //  */
-  // void calculateTopKDown();
-
-  /**
    * Calcula o Top-k dos Top-ks de acordo com o valor de k solicitado.
    * 
    * @param id             String - Id da requisição.
@@ -146,13 +122,6 @@ public interface Controller {
   public void removeNodeUri(String uri);
 
   /**
-   * Verifica se o gateway possui filhos.
-   *
-   * @return boolean
-   */
-  // public boolean hasNodes();
-
-  /**
    * Retorna a lista de URIs dos nós conectados.
    *
    * @return List
@@ -199,8 +168,6 @@ public interface Controller {
   public void addDeviceScore(String deviceId, int score);
 
   public void putDevicesScoresAll(Map<String, Integer> devicesScores);
-
-  // public void setJsonGetTopK(JsonObject jsonGetTopK);
 
   public long getResponseTime();
 

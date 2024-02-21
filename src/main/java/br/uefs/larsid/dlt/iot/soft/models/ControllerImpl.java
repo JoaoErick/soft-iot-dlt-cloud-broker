@@ -118,7 +118,7 @@ public class ControllerImpl implements Controller {
 
     // Envia solicitação de Top-K via MQTT
 
-    this.MQTTClientUp.publish(TOP_K, jsonTopK.toString().getBytes(), QOS);
+    this.MQTTClientHost.publish(TOP_K, jsonTopK.toString().getBytes(), QOS);
 
     // Inicia o cronômetro para a verificação do tempo de resposta
 
