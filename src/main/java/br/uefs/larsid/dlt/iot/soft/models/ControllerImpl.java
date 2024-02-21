@@ -1,18 +1,11 @@
 package br.uefs.larsid.dlt.iot.soft.models;
 
-// import br.uefs.larsid.dlt.iot.soft.entities.Device;
 import br.uefs.larsid.dlt.iot.soft.entities.Sensor;
-// import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerAuthenticatedDevices;
 import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerConnection;
-// import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerDeviceScoreEdge;
-// import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerDeviceScoreFog;
-// import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerRequest;
 import br.uefs.larsid.dlt.iot.soft.mqtt.ListenerResponse;
 import br.uefs.larsid.dlt.iot.soft.mqtt.MQTTClient;
 import br.uefs.larsid.dlt.iot.soft.services.Controller;
-// import br.uefs.larsid.dlt.iot.soft.utils.ConvertValueToScore;
 import br.uefs.larsid.dlt.iot.soft.utils.MapToArray;
-// import br.uefs.larsid.dlt.iot.soft.utils.RequestDevicesScores;
 import br.uefs.larsid.dlt.iot.soft.utils.SortTopK;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -29,17 +22,11 @@ public class ControllerImpl implements Controller {
   /*-------------------------Constantes---------------------------------------*/
   private static final int QOS = 1;
   private static final String TOP_K = "GET topk";
-  // private static final String TOP_K = "TOP_K_HEALTH/#";
-  // private static final String SENSORS_FOG = "GET sensors";
-  // private static final String SENSORS = "SENSORS";
   private static final String TOP_K_RES_FOG = "TOP_K_HEALTH_FOG_RES/";
-  // private static final String SENSORS_FOG_RES = "SENSORS_FOG_RES/";
-  // private static final String SENSORS_RES = "SENSORS_RES/";
   private static final String TOP_K_RES = "TOP_K_HEALTH_RES/#";
   private static final String INVALID_TOP_K = "INVALID_TOP_K/#";
   private static final String INVALID_TOP_K_FOG = "INVALID_TOP_K_FOG/";
 
-  // private static final String DEVICE_SCORE = "dev/+/score/RES";
 
   private static final String AUTHENTICATED_DEVICES = "AUTHENTICATED_DEVICES";
 
@@ -49,20 +36,17 @@ public class ControllerImpl implements Controller {
 
   private Node node;
 
-  // private boolean hasNodes;
   private MQTTClient MQTTClientUp;
   private MQTTClient MQTTClientHost;
 
   private Map<String, Map<String, Integer>> topKScores = new LinkedHashMap<String, Map<String, Integer>>();
   private Map<String, Integer> responseQueue = new LinkedHashMap<String, Integer>();
   private Map<String, Integer> devicesScores;
-  // private int amountDevicesScoresReceived = 0;
 
   private List<String> nodesUris;
   private int timeoutInSeconds;
 
   private JsonObject sensorsTypesJSON = new JsonObject();
-  // private JsonObject jsonGetTopK;
 
   private long responseTime;
   private boolean debugModeValue;
@@ -80,93 +64,34 @@ public class ControllerImpl implements Controller {
     this.node.setController(this);
 
     devicesScores = new LinkedHashMap<String, Integer>();
-    // if (hasNodes) {
-      nodesUris = new ArrayList<>();
-      // String[] topicsRequest = { TOP_K };
-      String[] topicsConnection = { CONNECT, DISCONNECT };
-      String[] topicsResponse = { TOP_K_RES, INVALID_TOP_K };
-      // String[] topicsDeviceScore = { DEVICE_SCORE };
+    nodesUris = new ArrayList<>();
+    String[] topicsConnection = { CONNECT, DISCONNECT };
+    String[] topicsResponse = { TOP_K_RES, INVALID_TOP_K };
 
-      new ListenerConnection(
-          this,
-          MQTTClientHost,
-          topicsConnection,
-          QOS,
-          debugModeValue);
-      new ListenerResponse(
-          this,
-          MQTTClientHost,
-          topicsResponse,
-          QOS,
-          debugModeValue);
-      // new ListenerDeviceScoreFog(
-      //     this,
-      //     MQTTClientHost,
-      //     topicsDeviceScore,
-      //     QOS,
-      //     debugModeValue);
-    // } else {
-    //   String[] topics = { TOP_K, SENSORS };
-    //   String[] topicsDeviceScore = { DEVICE_SCORE };
-
-    //   new ListenerRequest(
-    //       this,
-    //       MQTTClientUp,
-    //       MQTTClientHost,
-    //       this.nodesUris,
-    //       topics,
-    //       QOS,
-    //       debugModeValue);
-    //   new ListenerDeviceScoreEdge(
-    //       this,
-    //       MQTTClientHost,
-    //       topicsDeviceScore,
-    //       QOS,
-    //       debugModeValue);
-
-      // byte[] payload = String
-      //     .format("%s:%s", MQTTClientHost.getIp(), MQTTClientHost.getPort())
-      //     .getBytes();
-
-      // this.MQTTClientUp.publish(CONNECT, payload, QOS);
-    // }
-
-    // String[] topicsAutheticatedDevices = { AUTHENTICATED_DEVICES };
-
-    // new ListenerAuthenticatedDevices(
-    //       this,
-    //       MQTTClientHost,
-    //       topicsAutheticatedDevices,
-    //       QOS,
-    //       debugModeValue);
+    new ListenerConnection(
+        this,
+        MQTTClientHost,
+        topicsConnection,
+        QOS,
+        debugModeValue);
+    new ListenerResponse(
+        this,
+        MQTTClientHost,
+        topicsResponse,
+        QOS,
+        debugModeValue);
   }
 
   /**
    * Finaliza o bundle.
    */
   public void stop() {
-    // if (!this.hasNodes) {
-    //   byte[] payload = String
-    //       .format("%s:%s", MQTTClientHost.getIp(), MQTTClientHost.getPort())
-    //       .getBytes();
-
-    //   this.MQTTClientUp.publish(DISCONNECT, payload, QOS);
-
-      // this.MQTTClientUp.unsubscribe(TOP_K);
-      // this.MQTTClientUp.unsubscribe(SENSORS);
-      // this.MQTTClientHost.unsubscribe(DEVICE_SCORE);
-      // this.MQTTClientHost.unsubscribe(AUTHENTICATED_DEVICES);
-    // } else {
-      this.MQTTClientUp.unsubscribe(TOP_K);
-      // this.MQTTClientUp.unsubscribe(SENSORS_FOG);
-      this.MQTTClientUp.unsubscribe(CONNECT);
-      this.MQTTClientUp.unsubscribe(DISCONNECT);
-      this.MQTTClientHost.unsubscribe(TOP_K_RES);
-      this.MQTTClientHost.unsubscribe(INVALID_TOP_K);
-      // this.MQTTClientHost.unsubscribe(SENSORS_RES);
-      // this.MQTTClientHost.unsubscribe(DEVICE_SCORE);
-      this.MQTTClientHost.unsubscribe(AUTHENTICATED_DEVICES);
-    // }
+    this.MQTTClientUp.unsubscribe(TOP_K);
+    this.MQTTClientUp.unsubscribe(CONNECT);
+    this.MQTTClientUp.unsubscribe(DISCONNECT);
+    this.MQTTClientHost.unsubscribe(TOP_K_RES);
+    this.MQTTClientHost.unsubscribe(INVALID_TOP_K);
+    this.MQTTClientHost.unsubscribe(AUTHENTICATED_DEVICES);
 
     this.MQTTClientHost.disconnect();
     this.MQTTClientUp.disconnect();
@@ -174,7 +99,7 @@ public class ControllerImpl implements Controller {
 
   public void sendTopK() {
 
-    // Gera o JSON de requisição do top-k aleatório
+    // Gera o JSON de requisição do Top-K aleatório
 
     JsonObject jsonTopK = new JsonObject();
 
@@ -191,9 +116,7 @@ public class ControllerImpl implements Controller {
     jsonTopK.addProperty("k", k);
     jsonTopK.add("functionHealth", functionHealth);
 
-    printlnDebug(jsonTopK.toString()); // TODO: apagar
-    
-    // Envia solicitação de top-k via MQTT
+    // Envia solicitação de Top-K via MQTT
 
     this.MQTTClientUp.publish(TOP_K, jsonTopK.toString().getBytes(), QOS);
 
@@ -201,7 +124,7 @@ public class ControllerImpl implements Controller {
 
     this.setResponseTime(System.currentTimeMillis());
 
-    // Aguarda recebimento de todos os top-ks, calcula o top-k geral e 
+    // Aguarda recebimento de todos os Top-Ks, calcula o Top-K geral e 
     // devolve a resposta para o cliente.
 
     Map<String, Integer> scoreMapEmpty = new LinkedHashMap<String, Integer>();
@@ -219,125 +142,6 @@ public class ControllerImpl implements Controller {
   } 
 
   /**
-   * Calcula o score dos dispositivos conectados e autenticados.
-   *
-   * @return Map
-   */
-  // @Override
-  // public Map<String, Integer> calculateScoresAuthenticatedDevices(JsonArray functionHealth) {
-  //   Map<String, Integer> temp = new LinkedHashMap<String, Integer>();
-  //   List<String> sensorsTypes = this.loadSensorsTypes();
-  //   List<String> authenticatedDevicesTemp = this.getNode().getAuthenticatedDevicesIds();
-
-  //   if (sensorsTypes.size() == functionHealth.size()) {
-  //     for (int i = 0; i < functionHealth.size(); i++) {
-  //       String sensorType = functionHealth
-  //           .get(i)
-  //           .getAsJsonObject()
-  //           .get("sensor")
-  //           .getAsString();
-
-  //       /**
-  //        * Caso o tipo de sensor especificado não exista nos dispositivos,
-  //        * retorna um Map vazio.
-  //        */
-  //       if (!sensorsTypes.contains(sensorType)) {
-  //         return new LinkedHashMap<String, Integer>();
-  //       }
-  //     }
-
-  //     for (Device device : this.node.getDevices()) {
-  //       if (authenticatedDevicesTemp.contains(device.getId())) {
-  //         int score = 0;
-  //         int sumWeight = 0;
-
-  //         for (int i = 0; i < functionHealth.size(); i++) {
-  //           String sensorType = functionHealth
-  //               .get(i)
-  //               .getAsJsonObject()
-  //               .get("sensor")
-  //               .getAsString();
-  //           int weight = functionHealth
-  //               .get(i)
-  //               .getAsJsonObject()
-  //               .get("weight")
-  //               .getAsInt();
-
-  //           Sensor sensor = device.getSensorBySensorType(sensorType);
-  //           sensor.getValue(device.getId());
-  //           score += ConvertValueToScore.calculateSensorScore(
-  //               sensor.getType(),
-  //               sensor.getValue()) * weight;
-  //           sumWeight += weight;
-  //         }
-
-  //         temp.put(device.getId(), score / sumWeight);
-  //       }
-  //     }
-  //   }
-
-  //   return temp;
-  // }
-
-  /**
-   * Calcula o score dos dispositivos conectados.
-   *
-   * @return Map
-   */
-  // @Override
-  // public Map<String, Integer> calculateScores(JsonArray functionHealth) {
-  //   Map<String, Integer> temp = new LinkedHashMap<String, Integer>();
-  //   List<String> sensorsTypes = this.loadSensorsTypes();
-
-  //   if (sensorsTypes.size() == functionHealth.size()) {
-  //     for (int i = 0; i < functionHealth.size(); i++) {
-  //       String sensorType = functionHealth
-  //           .get(i)
-  //           .getAsJsonObject()
-  //           .get("sensor")
-  //           .getAsString();
-
-  //       /**
-  //        * Caso o tipo de sensor especificado não exista nos dispositivos,
-  //        * retorna um Map vazio.
-  //        */
-  //       if (!sensorsTypes.contains(sensorType)) {
-  //         return new LinkedHashMap<String, Integer>();
-  //       }
-  //     }
-
-  //     for (Device device : this.node.getDevices()) {
-  //       int score = 0;
-  //       int sumWeight = 0;
-
-  //       for (int i = 0; i < functionHealth.size(); i++) {
-  //         String sensorType = functionHealth
-  //             .get(i)
-  //             .getAsJsonObject()
-  //             .get("sensor")
-  //             .getAsString();
-  //         int weight = functionHealth
-  //             .get(i)
-  //             .getAsJsonObject()
-  //             .get("weight")
-  //             .getAsInt();
-
-  //         Sensor sensor = device.getSensorBySensorType(sensorType);
-  //         sensor.getValue(device.getId());
-  //         score += ConvertValueToScore.calculateSensorScore(
-  //             sensor.getType(),
-  //             sensor.getValue()) * weight;
-  //         sumWeight += weight;
-  //       }
-
-  //       temp.put(device.getId(), score / sumWeight);
-  //     }
-  //   }
-
-  //   return temp;
-  // }
-
-  /**
    * Publica o Top-K calculado para a camada de cima.
    *
    * @param id             String - Id da requisição.
@@ -352,15 +156,9 @@ public class ControllerImpl implements Controller {
     long start = System.currentTimeMillis();
     long end = start + this.timeoutInSeconds * 1000;
 
-    // if (this.hasNodes) {
-      /*
-       * Enquanto a quantidade de respostas da requisição for menor que o número
-       * de nós filhos
-       */
-      while (this.responseQueue.get(id) < this.nodesUris.size() &&
-          System.currentTimeMillis() < end) {
-      }
-    // }
+    while (this.responseQueue.get(id) < this.nodesUris.size() &&
+        System.currentTimeMillis() < end) {
+    }
 
     this.calculateGeneralTopK(id, k);
   }
@@ -529,112 +327,6 @@ public class ControllerImpl implements Controller {
   }
 
   /**
-   * Calcula o Top-k dos dispositivos na névoa.
-   */
-  // public void calculateTopKUp() {
-  //   printlnDebug("Calculating scores from devices...");
-
-  //   int k;
-  //   String id;
-  //   JsonArray functionHealth;
-
-  //   id = this.jsonGetTopK.get("id").getAsString();
-  //   k = this.jsonGetTopK.get("k").getAsInt();
-  //   functionHealth = this.jsonGetTopK.get("functionHealth").getAsJsonArray();
-
-  //   /* Adicionando os dispositivos conectados em si mesmo. */
-  //   this.putScores(id, this.calculateScoresAuthenticatedDevices(functionHealth));
-
-  //   int topkMapSize = this.topKScores.get(id).size();
-
-  //   if (topkMapSize < k) {
-  //     printlnDebug("Insufficient Top-K!");
-
-  //     this.sendInvalidTopKMessage(
-  //         id,
-  //         String.format(
-  //             "Can't possible calculate the Top-%s, sending the Top-%d!",
-  //             k,
-  //             topkMapSize));
-  //   }
-
-  //   this.calculateGeneralTopK(id, k);
-  // }
-
-  /**
-   * Calcula o Top-k dos dispositivos na borda da rede.
-   */
-  // public void calculateTopKDown() {
-  //   printlnDebug("Calculating scores from devices...");
-
-  //   int k;
-  //   String id;
-  //   JsonArray functionHealth;
-
-  //   id = this.jsonGetTopK.get("id").getAsString();
-  //   k = this.jsonGetTopK.get("k").getAsInt();
-  //   functionHealth = this.jsonGetTopK.get("functionHealth").getAsJsonArray();
-
-  //   Map<String, Integer> scores = new LinkedHashMap<String, Integer>();
-
-  //   /**
-  //    * Se não houver nenhum dispositivo conectado.
-  //    */
-  //   if (this.node.getDevices().isEmpty()) {
-  //     printlnDebug("Sorry, there are no devices connected.");
-
-  //     byte[] payload = scores.toString().getBytes();
-
-  //     MQTTClientUp.publish(TOP_K_RES_FOG + id, payload, 1);
-  //   } else {
-
-  //     scores = this.calculateScoresAuthenticatedDevices(functionHealth);
-
-  //     /*
-  //      * Reordenando o mapa de Top-K (Ex: {device2=23, device1=14}) e
-  //      * atribuindo-o à carga de mensagem do MQTT
-  //      */
-  //     Map<String, Integer> topK = SortTopK.sortTopK(
-  //         scores,
-  //         k,
-  //         debugModeValue);
-
-  //     // this.waitReceiveScores();
-
-  //     Map<String, Integer> topKReal = new LinkedHashMap<String, Integer>();
-
-  //     for (String deviceId : topK.keySet()) {
-  //       if (this.devicesScores.containsKey(deviceId)) {
-  //         topKReal.put(deviceId, this.devicesScores.get(deviceId));
-  //       }
-  //     }
-
-  //     if (k > scores.size()) {
-  //       printlnDebug("Insufficient Top-K!");
-
-  //       byte[] payload = String
-  //           .format(
-  //               "Can't possible calculate the Top-%s, sending the Top-%s!",
-  //               k,
-  //               scores.size())
-  //           .getBytes();
-
-  //       MQTTClientUp.publish("INVALID_TOP_K/" + id, payload, 1);
-  //     }
-
-  //     List<Map<String, Integer>> mapList = new ArrayList<>();
-  //     mapList.add(topK);
-  //     mapList.add(topKReal);
-
-  //     byte[] payload = mapList.toString().getBytes();
-
-  //     MQTTClientUp.publish("TOP_K_HEALTH_RES/" + id, payload, 1);
-
-  //     this.devicesScores.clear();
-  //   }
-  // }
-
-  /**
    * Calcula o Top-k dos Top-ks de acordo com o valor de k solicitado.
    */
   public void calculateGeneralTopK(String id, int k) {
@@ -649,8 +341,6 @@ public class ControllerImpl implements Controller {
           this.getMapById(id),
           k,
           debugModeValue);
-  
-      // this.waitReceiveScores();
   
       Map<String, Integer> topKReal = new LinkedHashMap<String, Integer>();
   
@@ -676,8 +366,6 @@ public class ControllerImpl implements Controller {
   
       MQTTClientUp.publish(TOP_K_RES_FOG + id, payload, 1);
   
-      printlnDebug(json.toString()); // TODO: apagar
-  
       this.removeRequest(id);
       this.removeSpecificResponse(id);
       
@@ -690,25 +378,7 @@ public class ControllerImpl implements Controller {
     }
 
     this.showResponseTime();
-
-    // this.amountDevicesScoresReceived = 0;
   }
-
-  // private void waitReceiveScores() {
-  //   printlnDebug("...Waiting for timeout to receive device scores...");
-
-  //   long start = System.currentTimeMillis();
-  //   long end = start + this.timeoutInSeconds * 1000;
-  //   while (
-  //     this.devicesScores.size() != this.node.getDevices().size() + this.amountDevicesScoresReceived &&
-  //     System.currentTimeMillis() < end
-  //   ) {
-  //     printlnDebug(
-  //         String.format("\rScores Received: [%s/%s] ",
-  //             this.devicesScores.size(),
-  //             this.node.getDevices().size() + this.amountDevicesScoresReceived));
-  //   }
-  // }
 
   /**
    * Exibe o tempo de resposta de uma solicitação.
@@ -859,20 +529,6 @@ public class ControllerImpl implements Controller {
     this.nodesUris = nodesUris;
   }
 
-  /**
-   * Verifica se o gateway possui filhos.
-   *
-   * @return boolean
-   */
-  // @Override
-  // public boolean hasNodes() {
-  //   return hasNodes;
-  // }
-
-  // public void setHasNodes(boolean hasNodes) {
-  //   this.hasNodes = hasNodes;
-  // }
-
   public void setTimeoutInSeconds(int timeoutInSeconds) {
     this.timeoutInSeconds = timeoutInSeconds;
   }
@@ -904,11 +560,6 @@ public class ControllerImpl implements Controller {
   }
 
   public void putDevicesScoresAll(Map<String, Integer> devicesScores) {
-    // this.amountDevicesScoresReceived += devicesScores.size();
     this.devicesScores.putAll(devicesScores);
   }
-
-  // public void setJsonGetTopK(JsonObject jsonGetTopK) {
-  //   this.jsonGetTopK = jsonGetTopK;
-  // }
 }
