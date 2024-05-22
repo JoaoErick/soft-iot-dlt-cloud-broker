@@ -30,6 +30,8 @@ public class Node implements INode {
 
     private String deviceAPIAddress;
 
+    private boolean hasCollectRealScoreService;
+
     private Controller controller;
     private boolean debugModeValue;
     private static final Logger logger = Logger.getLogger(Node.class.getName());
@@ -151,6 +153,14 @@ public class Node implements INode {
                 new SendTopKRequestTask(this, controller, debugModeValue),
                 0,
                 this.sendTopKRequestTaskTime * 1000);
+    }
+
+    public boolean hasCollectRealScoreService() {
+      return hasCollectRealScoreService;
+    }
+
+    public void setHasCollectRealScoreService(boolean hasCollectRealScoreService) {
+      this.hasCollectRealScoreService = hasCollectRealScoreService;
     }
 
     public boolean isDebugModeValue() {

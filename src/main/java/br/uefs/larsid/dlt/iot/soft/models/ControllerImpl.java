@@ -330,6 +330,10 @@ public class ControllerImpl implements Controller {
    * Calcula o Top-k dos Top-ks de acordo com o valor de k solicitado.
    */
   public void calculateGeneralTopK(String id, int k) {
+    Map<String, Integer> topK = new LinkedHashMap<String, Integer>();
+    Map<String, Integer> topKReal = new LinkedHashMap<String, Integer>();
+    String deviceListJson;
+
     printlnDebug("OK... now let's calculate the TOP-K of TOP-K's!");
 
     if (this.topKScores.get(id) != null) {
@@ -337,20 +341,18 @@ public class ControllerImpl implements Controller {
        * Reordenando o mapa de Top-K (Ex: {device2=23, device1=14}) e
        * atribuindo-o à carga de mensagem do MQTT
        */
-      Map<String, Integer> topK = SortTopK.sortTopK(
-          this.getMapById(id),
-          k,
-          debugModeValue);
+      topK = SortTopK.sortTopK(this.getMapById(id), k, debugModeValue);
   
-      Map<String, Integer> topKReal = new LinkedHashMap<String, Integer>();
+      if (this.node.hasCollectRealScoreService()) {
   
-      for (String deviceId : topK.keySet()) {
-        if (this.devicesScores.containsKey(deviceId)) {
-          topKReal.put(deviceId, this.devicesScores.get(deviceId));
+        for (String deviceId : topK.keySet()) {
+          if (this.devicesScores.containsKey(deviceId)) {
+            topKReal.put(deviceId, this.devicesScores.get(deviceId));
+          }
         }
-      }
   
-      this.devicesScores.clear();
+        this.devicesScores.clear();
+      }
   
       printlnDebug("==== Cloud gateway -> Client  ====");
   
@@ -358,7 +360,11 @@ public class ControllerImpl implements Controller {
       json.addProperty("id", id);
       json.addProperty("timestamp", System.currentTimeMillis());
   
-      String deviceListJson = new Gson().toJson(MapToArray.mapToArray(topK, topKReal));
+      if (this.node.hasCollectRealScoreService()) {
+        deviceListJson = new Gson().toJson(MapToArray.mapToArray(topK, topKReal));
+      } else {
+        deviceListJson = new Gson().toJson(MapToArray.mapToArray(topK));
+      }
   
       json.addProperty("devices", deviceListJson);
   

@@ -10,6 +10,7 @@
         init-method="start" destroy-method="stop">
         <property name="sendTopKRequestTaskTime" value="${sendTopKRequestTaskTime}" />
         <property name="deviceAPIAddress" value="${deviceAPIAddress}" />
+        <property name="hasCollectRealScoreService" value="${hasCollectRealScoreService}" />
         <property name="debugModeValue" value="${debugModeValue}" />
     </bean>
     
@@ -51,6 +52,7 @@
 			<cm:property name="user" value="karaf" />
 			<cm:property name="pass" value="karaf" />
 			<cm:property name="deviceAPIAddress" value="http://localhost:8181/cxf/iot-service/devices" />
+      <cm:property name="hasCollectRealScoreService" value="false" />
 			<cm:property name="timeoutInSeconds" value="30" />
             <cm:property name="sendTopKRequestTaskTime" value="15" />
 			<cm:property name="debugModeValue" value="true" />

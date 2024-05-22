@@ -20,6 +20,7 @@ Para a comunicação, é utilizado o protocolo MQTT.
 | pass             | Senha para conexão com o _Broker_                                  | karaf                                         |
 | deviceAPIAddress | URL da API onde estão os dispositivos                              | http://localhost:8181/cxf/iot-service/devices |
 | timeoutInSeconds | Tempo máximo de espera da resposta dos filhos                      | 30                                            |
+| hasCollectRealScoreService | Se o gateway onde o bundle está sendo executado deverá coletar os scores reais | false                   |
 | debugModeValue   | Modo depuração                                                     | true                                          |
 
 ## Protocolo Top-K
